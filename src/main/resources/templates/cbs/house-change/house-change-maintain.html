@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<div class="main-layout">
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-md12">
+            <div class="layui-row grid-demo">
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <button class="layui-btn" lay-submit lay-filter="add">新增</button>
+                    <button class="layui-btn">打开</button>
+                    <button class="layui-btn">整单删除</button>
+                    <button class="layui-btn">导出excel</button>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <div class="layui-col-md10">
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">所属公司</label>
+                                <div class="layui-input-block">
+                                    <select id="department" lay-verify="required">
+                                        <option value="">--选择公司--</option>
+                                        <option th:each="dept,deptStat:${departments}" th:text="${dept.fFullName}" th:value="${dept.fFullName}" th:selected="${request.department==dept.FFullName}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">变更日期</label>
+                                <div class="layui-input-inline" style="width: 180px;">
+                                    <input type="text" class="layui-input" id="change_time" th:value="${request.startTime!=null}? |${#dates.format(request.startTime,'yyyy-MM-dd')} ~ ${#dates.format(request.endTime,'yyyy-MM-dd')}| : ''">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键字</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="key" required   placeholder="关键字" autocomplete="off" class="layui-input" th:value="${request.key}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <button class="layui-btn" lay-submit lay-filter="submit">立即提交</button>
+                    </div>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <table class="layui-table" id="test">
+                        <thead>
+                        <tr>
+                            <th lay-data="{field:'fId', width:80, sort: true}">ID</th>
+                            <th lay-data="{field:'fCompanyBelong', width:80, sort: true}">所属公司</th>
+                            <th lay-data="{field:'fDate', width:120, sort: true, edit: 'text'}">变更日期</th>
+                            <th lay-data="{field:'fBillNumber', edit: 'text', minWidth: 150}">变更单号</th>
+                            <th lay-data="{field:'originalHouseFullNumber', edit: 'text', minWidth: 100}">原房号代码</th>
+                            <th lay-data="{field:'originalHouseFullName', sort: true, edit: 'text'}">原房号名称</th>
+                            <th lay-data="{field:'fNewNumber', sort: true, edit: 'text'}">新房号代码</th>
+                            <th lay-data="{field:'fNewName', sort: true, edit: 'text'}">新房号名称</th>
+                            <th lay-data="{field:'fOperator', sort: true, edit: 'text'}">操作员</th>
+                            <th lay-data="{field:'fCheck', sort: true, edit: 'text'}">审核人</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="houseChange,stat:${houseChangeList}">
+                            <td th:text="${houseChange.fId}"></td>
+                            <td th:text="${houseChange.fCompanyBelong}"></td>
+                            <td th:text="${#dates.format(houseChange.fDate,'yyyy-MM-dd')}"></td>
+                            <td th:text="${houseChange.fBillNumber}"></td>
+                            <td th:text="${houseChange.entries.get(0).originalHouseFullNumber}"></td>
+                            <td th:text="${houseChange.entries.get(0).originalHouseFullName}"></td>
+                            <td th:text="${houseChange.entries.get(0).FNewNumber}"></td>
+                            <td th:text="${houseChange.entries.get(0).FNewName}"></td>
+                            <td th:text="${houseChange.fOperator}"></td>
+                            <td th:text="${houseChange.fCheck}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="/footer :: footer"></div>
+<script>
+    layui.use(['laydate','table','form','layer'], function() {
+        var laydate = layui.laydate;
+        var table = layui.table;
+        var form = layui.form;
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#change_time'
+            , range: '~'
+            , format: 'yyyy-MM-dd'
+        });
+
+        form.on('submit(submit)', function(data){
+            var department = $("#department").val();
+            var time = $("#change_time").val();
+            var startTime = $.trim(time.split("~")[0]);
+            var endTime = $.trim(time.split("~")[1]);
+            var key = $("#key").val();
+            window.location.href="HouseChangeMaintain?department="+department+"&startTime="+startTime+"&endTime="+endTime+"&key="+key;
+        });
+
+        form.on('submit(add)', function(data){
+            layer.open({
+                type: 2,
+                title: false,
+                area: ['900px', '630px'],
+                shade: 0.8,
+                closeBtn: 1,
+                shadeClose: false,
+                content: 'HouseChangeOpen'
+            });
+        });
+
+    });
+</script>
+</body></html>

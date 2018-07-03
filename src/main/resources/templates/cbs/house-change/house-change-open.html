@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<div class="main-layout">
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-md12">
+            <div class="layui-row grid-demo">
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <button class="layui-btn" id="save">保存</button>
+                    <button class="layui-btn" id="addLine">插入行</button>
+                    <button class="layui-btn" id="delLine">删除行</button>
+                    <button class="layui-btn">审核</button>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <div class="layui-col-md12">
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">所属公司</label>
+                                <div class="layui-input-block">
+                                    <select id="fCompanyBelong" lay-verify="required">
+                                        <option th:each="dept,deptStat:${departments}" th:text="${dept.fFullName}" th:value="${dept.fFullName}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">变更日期</label>
+                                <div class="layui-input-inline">
+                                    <input id="fDate" type="text" disabled class="layui-input layui-disabled" style="width: 100px;" th:value="${#dates.format(houseChange.FDate,'yyyy-MM-dd')}">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">变更单号</label>
+                                <div class="layui-input-inline">
+                                    <input id="fBillNumber" disabled type="text" class="layui-input layui-disabled" style="width: 200px;" th:value="${houseChange.fBillNumber}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">备注</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="remark" id="remark"  placeholder="备注" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <table class="layui-hide" id="houseChangeTabel" lay-filter="houseChangeTabel">
+                    </table>
+                </div>
+                <div class="layui-col-md12">
+                    <div class="layui-form layui-form-pane">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">操作员</label>
+                            <div class="layui-input-inline">
+                                <input id="fOperator" type="text" class="layui-input layui-disabled" style="width: 100px;" disabled th:value="${houseChange.fOperator}">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">审核人</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input layui-disabled" style="width: 100px;" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="/footer :: footer"></div>
+<script>
+    var newLineArray = new Array();
+
+    function setNewLineArray(newLineArrayAttr) {
+        newLineArray = newLineArrayAttr;
+    }
+
+    layui.use(['laydate','table'], function(){
+        var laydate = layui.laydate;
+        var table = layui.table;
+        var tempId = 1;
+        var thead = [
+            {type:'checkbox'}
+            ,{field:'tempId', title: '序号', width: 70}
+            ,{field:'originalHouseId', title: '原房源ID', width: 100}
+            ,{field:'originalHouseFullName', title: '原房源名称', minWidth: 250}
+            ,{field:'originalHouseFullNumber',title: '原房号代码'}
+            ,{field:'fType', title: '变更类型', edit: 'text'}
+            ,{field:'newHouseNumber', title: '新房号代码', edit: 'text'}
+            ,{field:'newHouseName', title: '新房号名称', edit: 'text'}
+            ,{field:'fAcreage', title: '面积(平方米)', edit: 'text'}
+        ];
+        table.render({
+            elem: '#houseChangeTabel'
+            ,cols: [thead]
+        });
+
+        $("#addLine").click(function() {
+            newLineArray = new Array();
+            var oldData = table.cache.houseChangeTabel;
+            if (typeof(oldData) == "undefined")
+            {
+                oldData = new Array();
+            }
+            layer.open({
+                type: 2,
+                title: false,
+                area: ['900px', '630px'],
+                shade: 0.8,
+                closeBtn: 1,
+                shadeClose: false,
+                content: '/CBS/HouseChange/HouseChangeOpenChoose',
+                end: function(){
+                    $.each(newLineArray,function(index,newLine){
+                        newLine.tempId = tempId++;
+                        newLine.fType = "";
+                        newLine.newHouseNumber = "";
+                        newLine.newHouseName = "";
+                        oldData.push(newLine);
+                    });
+                    table.reload('houseChangeTabel', {
+                        data: oldData
+                    });
+                }
+            });
+
+        });
+
+            //监听单元格编辑
+        table.on('edit(test)', function(obj){
+            var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field; //得到字段
+            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+        });
+
+        $("#save").click(function() {
+            var checkStatus = table.checkStatus('houseChangeTabel')
+                ,datas = checkStatus.data;
+            var isComplete = true;
+            $.each(datas,function(index,data){
+                if(data.fType=="" || data.newHouseName=="" || data.fAcreage=="" || data.newHouseNumber ==""){
+                    isComplete = false;
+                }else{
+                    data.fCompanyBelong = $('#fCompanyBelong option:selected').val();
+                    data.fDate = $("#fDate").val();
+                    data.fBillNumber = $("#fBillNumber").val();
+                    data.fRemark = $("#remark").val();
+                }
+            });
+            if(!isComplete){
+                layer.msg("请输入完整信息");
+            }else{
+                console.log(JSON.stringify(datas));
+                $.post('/CBS/House/addHouseChange',{housesJson:JSON.stringify(datas)},function(){
+                    console.log(data);
+                },'json')
+                // $.ajax({
+                //     type: "POST",
+                //     async:false,
+                //     url: "/CBS/House/addHouseChange",
+                //     data: {housesJson: JSON.stringify(datas)},
+                //     dataType: "json",
+                //     contentType: 'application/json',
+                //     success: function(data){
+                //         console.log(data);
+                //     }
+                // });
+            }
+            //layer.alert(JSON.stringify(data));
+        });
+
+        $("#delLine").click(function() {
+            var checkStatus = table.checkStatus('houseChangeTabel')
+                ,datas = checkStatus.data;
+            var oldDatas = table.cache.houseChangeTabel;
+            var delIds = new Array();
+            $.each(datas, function(index, data) {
+                delIds.push(data.tempId);
+            });
+            $.each(delIds, function(index, delId) {
+                oldDatas = remove(oldDatas,"tempId",delId);
+            });
+            table.reload('houseChangeTabel', {
+                data: oldDatas
+            });
+        });
+
+        function remove(datas,property,value)
+        {
+            return $.grep(datas, function(cur,i){
+                return cur[property]!=value;
+            });
+        }
+        
+    });
+</script>
+</body>
+</html>

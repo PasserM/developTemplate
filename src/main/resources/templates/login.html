@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<link rel="stylesheet" href="/css/login.css" media="all">
+<body>
+<div class="m-login-bg">
+    <div class="m-login">
+        <h3>后台系统登录</h3>
+        <div class="m-login-warp">
+            <form class="layui-form" id="form">
+                <div class="layui-form-item">
+                    <input type="text" name="username" required lay-verify="required" placeholder="用户名" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <input type="password" name="password" required lay-verify="required" placeholder="密码" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-item m-login-btn">
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="login">登录</button>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="reset" class="layui-btn layui-btn-primary">取消</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <p class="copyright">Copyright 2015-2016 by XIAODU</p>
+    </div>
+</div>
+<div th:replace="/footer :: footer"></div>
+<script>
+    layui.use(['layer', 'form'], function(){
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(login)', function(data){
+            layui.jquery.ajax({
+                type: "POST",
+                url: "/index/login",
+                data:$("#form").serialize(),
+                async: false,
+                success: function (result) {
+                   if(result.code == 200){
+                       window.location.href="/index?type=estate";
+                   }else{
+                       layer.msg(result.result.split(":")[1]);
+                   }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body></html>

@@ -1,0 +1,45 @@
+server:
+    port: 8081
+spring:
+  session:
+    timeout: 6H
+  datasource:
+    sys:
+#        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#        url: jdbc:sqlserver://58.63.222.10:1433;DatabaseName=hsite;
+#        username: hsite
+#        password: hsite@20180606
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        url: jdbc:sqlserver://localhost:1433;DatabaseName=hsite;
+        username: sa
+        password: 2333
+    cbs:
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        url: jdbc:sqlserver://58.63.222.10:1433;DatabaseName=cbs;
+        username: hsite
+        password: hsite@20180606
+    scm:
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        url: jdbc:sqlserver://localhost:1433;DatabaseName=AIS20090112170128;
+        username: sa
+        password: 2333
+    thymeleaf:
+        cache: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+logging:
+  level:
+    com.hennro.hes.module.cbs.core.mapper: trace
+
+

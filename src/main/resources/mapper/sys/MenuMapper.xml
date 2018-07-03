@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hennro.hes.module.sys.core.mapper.MenuMapper">
+
+
+    <select id="findByUserId" resultType="com.hennro.hes.module.sys.core.domain.Menu">
+	<![CDATA[
+		declare @HID int
+		declare @userID int
+		declare @moduleCodeLength int
+		set @HID='2'
+		set @userID=#{userId}
+		set @moduleCodeLength='19'
+
+	    create table #module
+	    (
+	        [FID] [int] IDENTITY(1,1) NOT NULL,
+	        [FCode] [varchar](200) NULL,
+	        [FSYSID] int null,
+	        [FSYSName] varchar(50),
+	        [FModuleID] int null,
+	        [FType] int null,
+	        [FMenuID] int null,
+	        [FParentName] [varchar](255) NULL,
+	        [FMenuParentCode] [varchar](255) NULL,
+	        [FMenuCode] [varchar](255) NULL,
+	        [FModuleCode] [varchar](255) NULL,
+	        [FModuleName] [varchar](255) NULL,
+	        [FModuleFullName] [varchar](255) NULL,
+	        [FFormNameSpace] [varchar](255) NULL,
+	        [FFormFullName] [varchar](255) NULL,
+	        [FOrder] [int] NULL,
+	        [FUrl][varchar](255) NULL,
+	        [FTarget][varchar](255) NULL,
+	        [FImageLink][varchar](255) NULL,
+			[FPermission] [varchar](255) NULL
+	    )
+
+	    --根目录 FType=0
+	    insert into #module
+	    (
+	    FType,FMenuCode,FModuleCode,FModuleName,FModuleFullName,FFormNameSpace,
+	    FFormFullName,FOrder,FCode,FSYSID,FModuleID,FUrl
+	    )
+	    select '0','1001','','全部','全部',null,null,0,null,null,null,null
+
+	    --子系统 FType=1
+	    insert into #module
+	    (
+	    FType,FMenuCode,FModuleCode,FModuleName,FModuleFullName,FFormNameSpace,FFormFullName,
+	    FOrder ,FCode,FSYSID,FModuleID,FUrl,FSYSName
+	    )
+	    select 1,'1001.'+convert(varchar(50),t1.FSYSID+1000),'',t3.FName,t3.FName,null,null,
+	    t1.FOrderID,t3.FCode,t1.FSYSID,null,t3.FUrl,t3.FName
+	    from master.dbo.H_HManageSYS t1
+	    inner join master.dbo.H_HManage t2 on t1.FID=t2.FID
+	    inner join master.dbo.H_SysManage t3 on t1.FSYSID=t3.FID
+	    where t2.FID=@HID and t3.FType=1
+
+		--模块 FType=2
+	    insert into #module
+	    (
+	    FType,FMenuID,FMenuCode,FModuleCode,FModuleName,FModuleFullName,FFormNameSpace,FFormFullName,
+	    FOrder ,FCode,FSYSID,FModuleID,FUrl,FSYSName,FTarget,FPermission,FImageLink
+	    )
+	    select
+	    2,t4.FMenuID,'1001.'+convert(varchar(50),t1.FSYSID+1000)+'.'+t4.FModuleCode,t4.FModuleCode,t4.FModuleName,t3.FName+'.'+t4.FModuleFullName,
+	    t4.FFormNameSpace,t4.FFormFullName,
+	    t4.FOrder,t3.FCode,t1.FSYSID,t4.FID,t4.FUrl,t3.FName,t4.FTarget,t4.FPermission,t4.FImageLink
+	    from master.dbo.H_HManageSYS t1
+	    inner join master.dbo.H_HManage t2 on t1.FID=t2.FID
+	    inner join master.dbo.H_SysManage t3 on t1.FSYSID=t3.FID
+	    inner join master.dbo.H_Module t4 on t3.FCode=t4.FCode
+	    where t2.FID=@HID and t3.FType=1
+
+	    --按钮  FType=3
+	    insert into #module
+	    (
+	    FType,FMenuID,FMenuCode,
+	    FModuleCode,FModuleName,FModuleFullName,
+	    FFormNameSpace,FFormFullName,
+	    FOrder ,FCode,FSYSID,FModuleID,FUrl,
+	    FSYSName,FTarget,FPermission,FImageLink
+	    )
+	    select
+			3,t4.FID,'1001.'+convert(varchar(50),t1.FSYSID+1000)+'.'+t4.FModuleCode+'.'+convert(varchar(50),t5.FFuncID+1000),
+			t5.FFuncName,t5.FFuncText,t3.FName+'.'+t4.FModuleFullName+'.'+t5.FFuncText,
+			t4.FFormNameSpace,t4.FFormFullName,
+			t4.FOrder,t3.FCode,t1.FSYSID,t4.FID,null,
+			t3.FName,null,t5.FPermission,null
+	    from master.dbo.H_HManageSYS t1
+	    inner join master.dbo.H_HManage t2 on t1.FID=t2.FID
+	    inner join master.dbo.H_SysManage t3 on t1.FSYSID=t3.FID
+	    inner join master.dbo.H_Module t4 on t3.FCode=t4.FCode
+	    inner join master.dbo.H_ModuleFun t5 on t4.FID=t5.FMenuID
+	    where t2.FID=@HID and t3.FType=1
+
+		--获取父编码
+	    update t1
+	    set FMenuParentCode=left(FMenuCode, len(FMenuCode) - charindex('.', reverse(FMenuCode)))
+	    from #module t1
+
+	    update t1
+	    set t1.FParentName=t2.FModuleName
+	    from #module t1
+	    inner join #module t2 on t1.FMenuParentCode=t2.FMenuCode
+
+	    update t1
+	    set FMenuParentCode=null
+	    from #module t1
+	    where t1.FType=0
+
+	    --子系统权限
+	    select FRoleID
+	    into #roleTemp
+	    from dbo.H_UserRole
+	    where FUserID=@userID
+
+		--子系统管理员
+	    if exists(
+	    select 1
+	    from master.dbo.H_HManageSYS t1
+	    inner join master.dbo.H_HManage t2 on t1.FID=t2.FID
+	    inner join master.dbo.H_SysManage t3 on t1.FSYSID=t3.FID
+	    inner join H_UserSubSystem t4 on t3.FID=t4.FSysID
+	    where t2.FID=@HID and t4.FUserID=@userID
+	    )
+	    begin
+			select distinct t1.*
+			into #moduleRight
+			from #module t1
+			inner join
+			(
+				select t3.*
+				from dbo.H_UserSysRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t3.FType=1
+				union
+				select t3.*
+				from dbo.H_RoleSysRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t3.FType=1
+			)t2 on left(t1.FMenuCode,len(t2.FMenuCode))=t2.FMenuCode
+			union
+			select t1.* from  #module t1
+			inner join H_UserSubSystem t2 on t1.FSYSID=t2.FSysID and t2.FUserID=@userID
+			union
+			--模块权限
+			select t1.* from #module t1
+			inner join
+			(
+				select t3.*
+				from H_UserModuleRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t3.FType=2
+				union
+				select t3.*
+				from H_RoleModuleRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t3.FType=2
+			)t2 on t1.FType<=2 and (left(t1.FMenuCode,len(t2.FMenuCode))=t2.FMenuCode
+			or left(t2.FMenuCode,len(t1.FMenuCode))=t1.FMenuCode)
+			union
+			--按钮权限
+			select distinct t1.* from  #module t1
+			inner join
+			(
+				select t3.*
+				from H_UserFuncRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t2.FFuncName=t3.FModuleCode
+					and t3.FType=3
+				union
+				select t3.*
+				from H_RoleFuncRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t2.FFuncName=t3.FModuleCode
+					and t3.FType=3
+			)t2 on t1.FMenuCode=t2.FMenuCode
+
+			select
+				replace(FMenuCode,'.','_') as [id],
+				replace(FMenuParentCode,'.','_') as [parent.id],
+				FModuleName as [name],
+				FUrl as [href],
+				FTarget as [target],
+				FImageLink as [icon],
+				FOrder as [sort],
+				FPermission as [permission],
+				FParentName as [parent.name],
+				case when FType=3 then 0 else 1 end as [isShow]
+			from #moduleRight
+			where LEN(FModuleCode)<=@moduleCodeLength
+			order by FType,FMenuCode,FOrder
+			drop table #moduleRight
+
+	    end
+	    --非子系统管理员
+	    else
+	    begin
+			select distinct t1.*
+			into #moduleRight1
+			from #module t1
+			inner join
+			(
+				select t3.*
+				from dbo.H_UserSysRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t3.FType=1
+				union
+				select t3.*
+				from dbo.H_RoleSysRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t3.FType=1
+			)t2 on left(t1.FMenuCode,len(t2.FMenuCode))=t2.FMenuCode
+			union
+			--模块权限
+			select distinct t1.* from  #module t1
+			inner join
+			(
+				select t3.*
+				from H_UserModuleRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t3.FType=2
+				union
+				select t3.*
+				from H_RoleModuleRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t3.FType=2
+			)t2 on t1.FType<=2 and (left(t1.FMenuCode,len(t2.FMenuCode))=t2.FMenuCode
+			or left(t2.FMenuCode,len(t1.FMenuCode))=t1.FMenuCode)
+			union
+			--按钮权限
+			select distinct t1.* from  #module t1
+			inner join
+			(
+				select t3.*
+				from H_UserFuncRight t2
+				inner join #module t3 on t2.FUserID=@userID
+					and t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t2.FFuncName=t3.FModuleCode
+					and t3.FType=3
+				union
+				select t3.*
+				from H_RoleFuncRight t2
+				inner join #roleTemp t4 on t2.FRoleID=t4.FRoleID
+				inner join #module t3 on t2.FSysID=t3.FSYSID and t2.FMenuID=t3.FMenuID
+					and t2.FFuncName=t3.FModuleCode
+					and t3.FType=3
+			)t2 on t1.FMenuCode=t2.FMenuCode
+
+			order by t1.FMenuID
+
+			select
+				replace(FMenuCode,'.','_') as [id],
+				replace(FMenuParentCode,'.','_') as [parent.id],
+				FModuleName as [name],
+				FUrl as [href],
+				FTarget as [target],
+				FImageLink as [icon],
+				FOrder as [sort],
+				FPermission as [permission],
+				FParentName as [parent.name],
+				case when FType=3 then 0 else 1 end as [isShow]
+			from #moduleRight1
+			where LEN(FModuleCode)<=@moduleCodeLength
+			order by FOrder,FMenuCode
+			drop table #moduleRight1
+		end
+
+	    drop table #roleTemp
+	    drop table #module
+	    ]]>
+	</select>
+
+</mapper>

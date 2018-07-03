@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<div class="main-layout">
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-md12">
+            <div class="layui-row grid-demo">
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <button class="layui-btn" id="save">确认选择</button>
+                    <button class="layui-btn" id="close">关闭</button>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键字</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="key" id="key"  placeholder="关键字" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button class="layui-btn" id="keyFilter">过滤</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <div class="layui-col-xs3">
+                        <ul id="tree"></ul>
+                    </div>
+                    <div class="layui-col-xs9">
+                        <table class="layui-hide" id="addHouseChangeTable" lay-filter="addHouseChangeTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="/footer :: footer"></div>
+<script>
+    layui.use(['tree','laydate','table'], function(){
+        var laydate = layui.laydate;
+        var table = layui.table;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#test1'
+            ,type: 'month'
+            ,range: '~'
+            ,format: 'yyyy-MM'
+        });
+
+        var titles = [
+            {type:'checkbox'}
+            , {field: 'id', title: 'ID', width: 50}
+            ,{field: 'fFullNumber', title: '代码'}
+            ,{field: 'fFullName', title: '全名', minWidth: 250}
+            ,{field: 'fAcreage', title: '面积'}
+        ];
+
+        table.render({
+            elem: '#addHouseChangeTable'
+            ,cols: [titles]
+            ,data: []
+        });
+
+
+        getTreeData();
+        function getTreeData(){
+            $("#tree").empty();
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "/CBS/House/houseByTree?key=" + $("#key").val(),
+                dataType: "json",
+                success: function(data){
+                    layui.tree({
+                        elem: '#tree' //指定元素
+                        ,target: '_blank' //是否新选项卡打开（比如节点返回href才有效）
+                        ,click: function(item){ //点击节点回调
+                            addToTable(item.id);
+                        }
+                        ,nodes: data
+                    });
+                }
+            });
+        }
+
+        function addToTable(id){
+            var oldData = new Array();
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "/CBS/House/houseByParentId?parentId=" + id,
+                dataType: "json",
+                success: function(datas){
+                    $.each(datas,function (index,data) {
+                        var tableData = new Object();
+                        tableData.id=data.fitemId;
+                        tableData.fFullNumber=data.ffullNumber;
+                        tableData.fFullName=data.ffullName;
+                        tableData.fAcreage=data.facreage;
+                        oldData.push(tableData);
+                    })
+                }
+            });
+
+            table.reload('addHouseChangeTable', {
+                data: oldData
+            });
+        }
+
+        $("#keyFilter").click(function(){
+            getTreeData();
+        })
+
+        $("#save").click(function(){
+            var checkStatus = table.checkStatus('addHouseChangeTable')
+                ,datas = checkStatus.data;
+            var newLineArray = new Array();
+            $.each(datas,function (index,data) {
+               var newLine = new Object();
+               newLine.originalHouseId = data.id;
+               newLine.originalHouseFullName = data.fFullName;
+               newLine.originalHouseFullNumber = data.fFullNumber;
+               newLine.fAcreage = data.fAcreage;
+               newLineArray.push(newLine);
+            });
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.setNewLineArray(newLineArray);
+            parent.layer.close(index);
+        })
+
+        $("#close").click(function(){
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.setNewLineArray(new Array());
+            parent.layer.close(index);
+        })
+    });
+</script>
+</body>
+</html>

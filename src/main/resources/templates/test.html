@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<div class="main-layout">
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-md5">
+            <div class="layui-row grid-demo">
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <button class="layui-btn">新增</button>
+                    <button class="layui-btn">打开</button>
+                    <button class="layui-btn">整单删除</button>
+                    <button class="layui-btn">导出excel</button>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <div class="layui-col-md10">
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">所属公司</label>
+                                <div class="layui-input-block">
+                                    <select name="city" lay-verify="required">
+                                        <option value=""></option>
+                                        <option value="0">集团公司</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">变更日期从</label>
+                                <div class="layui-input-inline" style="width: 150px;">
+                                    <input type="text" class="layui-input" id="test1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键字</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="title" required   placeholder="关键字" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md2">
+                        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                    </div>
+                </div>
+                <div class="layui-col-md12">
+                    <fieldset class="layui-elem-field layui-field-title"></fieldset>
+                    <table class="layui-hide" id="test"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="/footer :: footer"></div>
+<script>
+    layui.use(['laydate','table'], function(){
+        var laydate = layui.laydate;
+        var table = layui.table;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#test1'
+            ,type: 'month'
+            ,range: '~'
+            ,format: 'yyyy-MM'
+        });
+
+        var titles = [
+            {field: 'id', title: 'ID', width: 80, sort: true}
+            ,{field: 'username', title: '用户名', width: 120}
+            ,{field: 'email', title: '邮箱', minWidth: 150}
+            ,{field: 'sign', title: '签名', minWidth: 160}
+            ,{field: 'sex', title: '性别', width: 80}
+            ,{field: 'city', title: '城市', width: 100}
+            ,{field: 'experience', title: '积分', width: 80, sort: true}
+        ];
+
+        table.render({
+            elem: '#test'
+            //,url:'/demo/table/user/'
+            ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+                //,curr: 5 //设定初始在第 5 页
+                ,groups: 1 //只显示 1 个连续页码
+                ,first: false //不显示首页
+                ,last: false //不显示尾页
+
+            }
+            ,cols: [titles]
+            ,data: [{
+                "id": "10001"
+                ,"username": "杜甫"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "116"
+                ,"ip": "192.168.0.8"
+                ,"logins": "108"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10002"
+                ,"username": "李白"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "12"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+                ,"LAY_CHECKED": true
+            }, {
+                "id": "10003"
+                ,"username": "王勃"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "65"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10004"
+                ,"username": "贤心"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "666"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10005"
+                ,"username": "贤心"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "86"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10006"
+                ,"username": "贤心"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "12"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10007"
+                ,"username": "贤心"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "16"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }, {
+                "id": "10008"
+                ,"username": "贤心"
+                ,"email": "xianxin@layui.com"
+                ,"sex": "男"
+                ,"city": "浙江杭州"
+                ,"sign": "人生恰似一场修行"
+                ,"experience": "106"
+                ,"ip": "192.168.0.8"
+                ,"logins": "106"
+                ,"joinTime": "2016-10-14"
+            }]
+        });
+    });
+</script>
+</body>
+</html>
