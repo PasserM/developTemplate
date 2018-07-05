@@ -12,9 +12,4 @@ public class OrderService {
     @Resource
     private OrderMapper orderMapper;
 
-    public List<Order> getOrderList(Order order){
-
-        return orderMapper.selectOrderPage(order);
-    }
-
 }

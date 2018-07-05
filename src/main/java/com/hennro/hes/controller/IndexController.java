@@ -2,6 +2,7 @@ package com.hennro.hes.controller;
 
 import com.hennro.hes.common.JsonHelper;
 import com.hennro.hes.common.base.Response;
+import com.hennro.hes.module.sys.core.domain.Menu;
 import com.hennro.hes.module.sys.core.entity.HUser;
 import com.hennro.hes.module.sys.core.service.MenuService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * Created by anxpp.com on 2018/6/23.
@@ -36,6 +38,9 @@ public class IndexController {
             return "login";
         }
         model.addAttribute("user",user);
+        List<Menu> list = menuService.findByUserId(user.getFid());
+        System.out.println(list.size());
+
         if(type.equals("property")){
             model.addAttribute("menus",menuService.findByUserId(user.getFid()).get(0).getChildren().get(0).getChildren());
             return "index-property";

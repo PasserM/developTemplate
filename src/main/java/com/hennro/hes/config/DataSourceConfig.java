@@ -28,19 +28,6 @@ public class DataSourceConfig {
     }
 
     @Bean
-    @ConfigurationProperties("spring.datasource.cbs")
-    public DataSourceProperties cbsDataSourceProperties() {
-        return new DataSourceProperties();
-    }
-
-    @Bean
-    @Qualifier("cbsDataSource")
-    @ConfigurationProperties("spring.datasource.cbs")
-    public DataSource cbsDataSource() {
-        return cbsDataSourceProperties().initializeDataSourceBuilder().build();
-    }
-
-    @Bean
     @ConfigurationProperties("spring.datasource.scm")
     public DataSourceProperties scmDataSourceProperties() {
         return new DataSourceProperties();

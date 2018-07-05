@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import java.util.Date;
 @Entity
 public class OrderExport {
 
+	@Id
 	private Long fid;
 	private String billNo;
 	private String date;

@@ -5,22 +5,13 @@ spring:
     timeout: 6H
   datasource:
     sys:
-#        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#        url: jdbc:sqlserver://58.63.222.10:1433;DatabaseName=hsite;
-#        username: hsite
-#        password: hsite@20180606
         driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-        url: jdbc:sqlserver://localhost:1433;DatabaseName=hsite;
+        url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=HES;
         username: sa
         password: 2333
-    cbs:
-        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-        url: jdbc:sqlserver://58.63.222.10:1433;DatabaseName=cbs;
-        username: hsite
-        password: hsite@20180606
     scm:
         driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-        url: jdbc:sqlserver://localhost:1433;DatabaseName=AIS20090112170128;
+        url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=AIS20090112170128;
         username: sa
         password: 2333
     thymeleaf:
@@ -40,6 +31,6 @@ pagehelper:
     params: count=countSql
 logging:
   level:
-    com.hennro.hes.module.cbs.core.mapper: trace
+    com.hennro.hes.module.scm.mapper: trace
 
 

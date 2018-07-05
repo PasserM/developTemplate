@@ -1,5 +1,6 @@
 package com.hennro.hes;
 
+import com.hennro.hes.config.DataSourceConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

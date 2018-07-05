@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 import java.util.List;
 
@@ -16,7 +17,8 @@ import java.util.List;
 @Setter
 @Entity
 public class Preorder {
-
+	@Id
+	private int id;
 	private String tranType;
 	private String billNo;
 	private Date date;

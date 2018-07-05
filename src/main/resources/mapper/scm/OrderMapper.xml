@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hennro.hes.module.scm.mapper.OrderMapper">
+
 <sql id="baseSelect" >
 		SELECT o.[FID] as id
 		,o.[FBillNo] as billNo
@@ -16,7 +17,7 @@
 		,case
 		when isnull(o.FReadFlag,0)='0' then '未读'
 		when isnull(o.FReadFlag,0)='1' then '已读未确认'
-		when isnull(o.FReadFlag,0)='2' then '已确认' 
+		when isnull(o.FReadFlag,0)='2' then '已确认'
 		when isnull(o.FReadFlag,0)='3' then '已完成'
 		end as readFlag
 
@@ -24,43 +25,5 @@
 		inner join t_Supplier s on o.FSupplyID=s.FItemID
 		inner join t_Currency c on o.FCurrencyID=c.FCurrencyID
 	</sql>
-
-	<select id="selectOrderPage" resultType="com.hennro.hes.module.scm.entity.Order">
-		select * from (
-		<include refid="baseSelect"></include>
-		) t
-		where t.supplyName= #{loginName}
-		<if test="startDate != null and startDate != ''">
-		<![CDATA[
-		and t.billDate>=#{startDate}
-		]]>
-		</if>
-		<if test="endDate != null and endDate != ''">
-		<![CDATA[
-		and t.billDate<=#{endDate}
-		]]>
-		</if>
-		<if test="searchKey != null and searchKey != ''">
-		<bind name="searchKey" value="'%'+searchKey+'%'" />
-		<![CDATA[
-		and concat(
-			t.billNo,t.biller,t.checker,t.supplyName,t.currencyName,t.readFlag
-    		) like #{searchKey}
-    		]]>
-		</if>
-		
-		order by t.billDate desc
-	</select>
-
-	<select id="getOrderById" resultType="com.hennro.hes.module.scm.entity.Order">
-		<include refid="baseSelect"></include>
-		WHERE o.[FID] = #{id}
-	</select>
-
-	<update id="updateStatus" >
-		update H_POOrder set FReadFlag = #{readFlag} 
-		where fid = #{id}
-	</update>
-
 
 </mapper>

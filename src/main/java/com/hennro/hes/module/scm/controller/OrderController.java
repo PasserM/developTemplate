@@ -17,8 +17,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/scm/order")
 public class OrderController {
-    @Resource
-    OrderService orderService;
 
     @Resource
     JsonHelper jsonHelper;
@@ -28,11 +26,11 @@ public class OrderController {
         //System.out.println(principal.getLoginName());
         HUser user = (HUser)request.getAttribute("user");
         order.setLoginName(user.getFLoginName());
-        System.out.println("searchKey:"+order.getSearchKey()+" st:"+order.getStartDate()+" et:"+order.getEndDate());
-
-        List<Order> page = orderService.getOrderList(order);
-        String jsonData =  jsonHelper.string(page);
-        model.addAttribute("page", jsonData);
+//        System.out.println("searchKey:"+order.getSearchKey()+" st:"+order.getStartDate()+" et:"+order.getEndDate());
+//
+//        List<Order> orderList = orderService.getOrderList(order);
+//        String jsonData =  jsonHelper.string(orderList);
+//        model.addAttribute("orderList", jsonData);
         return "scm/order/orderList";
 
     }
