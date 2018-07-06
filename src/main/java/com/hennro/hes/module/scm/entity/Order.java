@@ -16,7 +16,7 @@ import java.util.Date;
 public class Order {
     @Id
     @Column(name = "FID")
-    private int fid;
+    private int id;
     private String billNo;
     private Date date;
     private String supplyName;

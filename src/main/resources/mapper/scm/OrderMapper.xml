@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hennro.hes.module.scm.mapper.OrderMapper">
 
-<sql id="baseSelect" >
-		SELECT o.[FID] as id
+    <select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
+        SELECT o.[FID] as id
 		,o.[FBillNo] as billNo
 		,o.[FDate] as date
 		,s.[FName] as supplyName
@@ -24,6 +24,6 @@
 		FROM [dbo].[H_POOrder] o
 		inner join t_Supplier s on o.FSupplyID=s.FItemID
 		inner join t_Currency c on o.FCurrencyID=c.FCurrencyID
-	</sql>
-
+        where s.[FName]= #{loginName}
+    </select>
 </mapper>

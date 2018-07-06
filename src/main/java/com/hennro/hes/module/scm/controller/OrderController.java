@@ -19,18 +19,16 @@ import java.util.List;
 public class OrderController {
 
     @Resource
-    JsonHelper jsonHelper;
+    OrderService orderService;
 
     @RequestMapping(value = {"list",""})
     public String list(Order order , HttpServletRequest request, HttpServletResponse response, Model model) {
         //System.out.println(principal.getLoginName());
         HUser user = (HUser)request.getAttribute("user");
-        order.setLoginName(user.getFLoginName());
 //        System.out.println("searchKey:"+order.getSearchKey()+" st:"+order.getStartDate()+" et:"+order.getEndDate());
 //
-//        List<Order> orderList = orderService.getOrderList(order);
-//        String jsonData =  jsonHelper.string(orderList);
-//        model.addAttribute("orderList", jsonData);
+        List<Order> orderList = orderService.getOrderList(user.getFLoginName());
+        model.addAttribute("orderList", orderList);
         return "scm/order/orderList";
 
     }

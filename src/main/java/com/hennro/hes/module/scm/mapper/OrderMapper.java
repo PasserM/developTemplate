@@ -10,5 +10,5 @@ import java.util.List;
 
 @Mapper
 public interface OrderMapper {
-
+    List<Order> findAll(@Param("loginName")String loginName);
 }
