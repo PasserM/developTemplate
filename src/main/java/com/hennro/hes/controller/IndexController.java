@@ -11,12 +11,14 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,20 +36,35 @@ public class IndexController {
     public String index(String type,Model model,HttpSession session) {
         Subject subject = SecurityUtils.getSubject();
         HUser user = (HUser) subject.getPrincipal();
-        if(null == user){
+        if (null == user) {
             return "login";
         }
-        model.addAttribute("user",user);
-        List<Menu> list = menuService.findByUserId(user.getFid());
-        System.out.println(list.size());
+        model.addAttribute("user", user);
 
-        if(type.equals("property")){
-            model.addAttribute("menus",menuService.findByUserId(user.getFid()).get(0).getChildren().get(0).getChildren());
-            return "index-property";
-        }else{
-            model.addAttribute("menus",menuService.findByUserId(user.getFid()).get(0).getChildren().get(1).getChildren());
-            return "index-estate";
+        List<Menu> menus = menuService.findByUserId(user.getFid());
+        List<Menu> topMenus = new ArrayList<>();
+        List<Menu> leftMenus = new ArrayList<>();
+        if(menus.size()>0){
+            //顶部大栏目 list
+            for(Menu menu : menus.get(0).getChildren()){
+                topMenus.add(menu);
+            }
+            //左侧小栏目 list
+            for(Menu menu : menus.get(0).getChildren()){
+                if(StringUtils.isEmpty(type)){
+                    type = menu.getName();
+                }
+                if(menu.getName().equals(type)){
+                    leftMenus = menu.getChildren();
+                }
+            }
         }
+
+
+        model.addAttribute("topMenus",topMenus);
+        model.addAttribute("leftMenus",leftMenus);
+        model.addAttribute("type",type);
+        return "index";
 
     }
 

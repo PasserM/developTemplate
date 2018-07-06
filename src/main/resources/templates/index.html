@@ -12,14 +12,14 @@
             </div>
         </div>
         <ul  class="layui-nav layui-nav-tree" lay-filter="leftNav">
-            <li th:each="menu,menuStat:${menus}" th:class="layui-nav-item">
+            <li th:each="menu,menuStat:${leftMenus}" th:class="layui-nav-item">
                 <a href="javascript:;"><i class="iconfont">&#xe608;</i><span  th:text="${menu.name}"></span><span class="layui-nav-more"></span></a>
                 <dl th:if="${#lists.size(menu.children)} gt '0'" class="layui-nav-child">
                     <dd th:each="subMenu,subMenuStat:${menu.children}" class="layui-nav-item">
                         <a href="javascript:;" th:if="${subMenu.isShow} eq '1'"><span th:text="${subMenu.name}"></span><span class="layui-nav-more"></span></a>
                         <dl class="layui-nav-child">
                             <dd th:each="subMenu2,subMenu2Stat:${subMenu.children}" data-name="list">
-                                <a href="javascript:;" th:if="${subMenu2.isShow} eq '1'" th:attr="data-text=${subMenu2.name},data-id=|${menuStat.index}${subMenuStat.index}${subMenu2Stat.index}|,data-url=${subMenu2.href}"><span class="l-line"></span><span  th:text="${subMenu2.name}"></span></a>
+                                <a href="javascript:;" th:if="${subMenu2.isShow} eq '1'" th:attr="data-text=${subMenu2.name},data-id=${subMenu2.name},data-url=${subMenu2.href}"><span class="l-line"></span><span  th:text="${subMenu2.name}"></span></a>
                             </dd>
                         </dl>
                     </dd>
@@ -37,11 +37,8 @@
                     <span class="iconfont">&#xe60e;</span>
                 </a>
             </div>
-            <div class="nav-btn-fix">
-                不动产管理系统
-            </div>
-            <div class="nav-btn-fix">
-                物业管理系统
+            <div th:each="topMenu,menuStat:${topMenus}" th:text="${topMenu.name}" class="nav-btn-fix"
+                 th:onclick="'javascript:changeTo(\''+${topMenu.name}+'\')'" th:style="${topMenu.name == type} ? 'color: #00b5f9'">
             </div>
             <ul class="layui-nav" lay-filter="rightNav">
                 <li class="layui-nav-item header-tool-fix">
@@ -54,13 +51,13 @@
         <div class="main-layout-body">
             <!--tab 切换-->
             <div class="layui-tab layui-tab-brief main-layout-tab" lay-filter="tab" lay-allowClose="true">
-                <ul class="layui-tab-title">
+                <ul class="layui-tab-title" id="tab-ul">
                     <li class="layui-this welcome">后台主页</li>
                 </ul>
                 <div class="layui-tab-content">
                     <div class="layui-tab-item layui-show" style="background: #f5f5f5;">
                         <!--1-->
-                        <iframe src="welcome.html" width="100%" height="100%" name="iframe" scrolling="auto" class="iframe" framborder="0"></iframe>
+                        <iframe src="" width="100%" height="100%" name="iframe" scrolling="auto" class="iframe" framborder="0"></iframe>
                         <!--1end-->
                     </div>
                 </div>
@@ -73,5 +70,10 @@
     </div>
 </div>
 <div th:replace="/footer :: footer"></div>
+<script>
+    function changeTo(type){
+        window.location.href="/index?type="+type;
+    }
+</script>
 </body>
 </html>
