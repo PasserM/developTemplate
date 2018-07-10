@@ -31,6 +31,6 @@ pagehelper:
     params: count=countSql
 logging:
   level:
-    com.hennro.hes.module.scm.mapper: trace
+    com.hennro.hes.module.scm.core.mapper: trace
 
 

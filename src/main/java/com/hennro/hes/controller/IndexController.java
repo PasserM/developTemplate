@@ -54,9 +54,8 @@ public class IndexController {
                 if(StringUtils.isEmpty(type)){
                     type = menu.getName();
                 }
-                if(menu.getName().equals(type)){
-                    leftMenus = menu.getChildren();
-                }
+                leftMenus = menu.getChildren();
+
             }
         }
 

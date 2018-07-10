@@ -13,15 +13,30 @@
         </div>
         <ul  class="layui-nav layui-nav-tree" lay-filter="leftNav">
             <li th:each="menu,menuStat:${leftMenus}" th:class="layui-nav-item">
-                <a href="javascript:;"><i class="iconfont">&#xe608;</i><span  th:text="${menu.name}"></span><span class="layui-nav-more"></span></a>
+                <a href="javascript:;"><i class="iconfont">&#xe608;</i>
+                    <span  th:text="${menu.name}"></span>
+                    <span class="layui-nav-more"></span>
+                </a>
                 <dl th:if="${#lists.size(menu.children)} gt '0'" class="layui-nav-child">
                     <dd th:each="subMenu,subMenuStat:${menu.children}" class="layui-nav-item">
-                        <a href="javascript:;" th:if="${subMenu.isShow} eq '1'"><span th:text="${subMenu.name}"></span><span class="layui-nav-more"></span></a>
-                        <dl class="layui-nav-child">
-                            <dd th:each="subMenu2,subMenu2Stat:${subMenu.children}" data-name="list">
-                                <a href="javascript:;" th:if="${subMenu2.isShow} eq '1'" th:attr="data-text=${subMenu2.name},data-id=${subMenu2.name},data-url=${subMenu2.href}"><span class="l-line"></span><span  th:text="${subMenu2.name}"></span></a>
-                            </dd>
-                        </dl>
+
+                        <!--<a href="javascript:;" th:if="${subMenu.isShow} eq '1'">-->
+                            <!--<span th:text="${subMenu.name}"></span>-->
+                            <!--<span class="layui-nav-more"></span>-->
+                        <!--</a>-->
+                        <a href="javascript:;"
+                           th:if="${subMenu.isShow} eq '1'"
+                           th:attr="data-text=${subMenu.name},data-id=${subMenu.name},data-url=${subMenu.href}">
+                            <span th:text="${subMenu.name}"></span>
+                        </a>
+                        <!--<dl  class="layui-nav-child">-->
+                            <!--<dd th:each="subMenu2,subMenu2Stat:${subMenu.children}" data-name="list">-->
+                                <!--<a href="javascript:;" th:if="${subMenu2.isShow} eq '1'" th:attr="data-text=${subMenu2.name},data-id=${subMenu2.name},data-url=${subMenu2.href}">-->
+                                    <!--&lt;!&ndash;<span class="l-line"></span>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<span  th:text="${subMenu2.name}"></span>&ndash;&gt;-->
+                                <!--</a>-->
+                            <!--</dd>-->
+                        <!--</dl>-->
                     </dd>
                 </dl>
             </li>

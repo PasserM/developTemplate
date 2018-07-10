@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hennro.hes.module.scm.mapper.OrderMapper">
-
-    <select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
-        SELECT o.[FID] as id
+	<sql id="baseSql">
+		 SELECT o.[FID] as id
 		,o.[FBillNo] as billNo
 		,o.[FDate] as date
 		,s.[FName] as supplyName
@@ -24,6 +23,33 @@
 		FROM [dbo].[H_POOrder] o
 		inner join t_Supplier s on o.FSupplyID=s.FItemID
 		inner join t_Currency c on o.FCurrencyID=c.FCurrencyID
-        where s.[FName]= #{loginName}
+	</sql>
+    <select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
+		select top #{pageSize} * from (
+		select top ( (#{PageNum}+1) * #{pageSize}) * from(
+		select * from (
+		<include refid="baseSql"/>
+		) t
+		where t.supplyName= #{supplyName}
+		<if test="startDate != null">
+			<![CDATA[
+		and t.billDate>=#{startDate}
+		]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+		and t.billDate<=#{endDate}
+		]]>
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			<bind name="searchKey" value="'%'+searchKey+'%'"/>
+			<![CDATA[
+		and concat(
+			t.billNo,t.biller,t.checker,t.supplyName,t.currencyName,t.readFlag
+    		) like #{searchKey}
+    		]]>
+		</if>
+		order by billDate desc
+		)) o
     </select>
 </mapper>

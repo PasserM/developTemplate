@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Created by tianjianping in 2018/6/14
  */
@@ -16,12 +18,21 @@ public class Response<T> {
     private String code;
     private String msg;
     private T result;
+    private List<Object> data;
 
     public static <T> Response<T> success(T data) {
         Response<T> response = new Response<>();
         response.setMsg("success");
         response.setCode("200");
         response.setResult(data);
+        return response;
+    }
+
+    public static <T> Response<T> success(List<Object> data) {
+        Response<T> response = new Response<>();
+        response.setMsg("success");
+        response.setCode("200");
+        response.setData(data);
         return response;
     }
 

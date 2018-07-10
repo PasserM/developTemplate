@@ -3,6 +3,68 @@
 <head th:replace="/header :: header">
 </head>
 <body>
-${page}
+<div class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">日期范围</label>
+            <div class="layui-input-inline">
+                <!--<input type="text" class="layui-input" id="dateRange"  name="dateRange" placeholder=" - ">-->
+                <input type="text" class="layui-input" id="dateRange" th:value="${order.startTime!=null}? |${#dates.format(order.startTime,'yyyy-MM-dd')} ~ ${#dates.format(order.endTime,'yyyy-MM-dd')}| : ''">
+            </div>
+            <label class="layui-form-label">关键词：</label>
+            <div class="layui-inline">
+                <input class="layui-input" name="searchKey" id="searchKey" autocomplete="off">
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+    </div>
+</div>
+<table class="layui-table"
+       lay-data="{url:'/scm/order/orderGrid',id:'orderGrid',page:false}"
+
+>
+    <thead>
+    <tr>
+        <!--<th lay-data="{fixed: 'right',toolbar: '#orderOptBar'}">操作</th>-->
+        <th lay-data="{field:'id',sort: true, fixed: true}">ID</th>
+        <th lay-data="{field:'billNo',}">订单号</th>
+        <th lay-data="{field:'currencyName'}">币种</th>
+        <th lay-data="{field:'taxRate',}">税率</th>
+        <th lay-data="{field:'biller'}">制单人</th>
+        <th lay-data="{field:'billDate',sort: true}">制单日期</th>
+        <th lay-data="{field:'checker',}">审核人</th>
+        <th lay-data="{field:'checkDate', sort: true}">审核日期</th>
+        <th lay-data="{field:'readFlag'}">订单状态</th>
+
+    </tr>
+    </thead>
+</table>
+
+<script type="text/html" id="orderOptBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看/确认订单</a>
+</script>
+
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        //监听工具条
+        // table.on('tool(orderOptBar)', function(obj){
+        //     var data = obj.data;
+        //     if(obj.event === 'detail'){
+        //         layer.msg('ID：'+ data.id + ' 的查看操作');
+        //     }
+        // });
+    });
+    //
+    // layui.use('laydate', function() {
+    //     var laydate = layui.laydate;
+    //     //日期范围
+    //     laydate.render({
+    //         elem: '#dateRange'
+    //         , range: true
+    //     });
+    // });
+</script>
 </body>
 </html>

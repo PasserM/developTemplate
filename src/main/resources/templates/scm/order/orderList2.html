@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<form class="layui-form" id="searchFrm">
+    <input type="hidden" name="pageNum">
+    <input type="hidden" name="pageSize">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">日期范围</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="dateRange"  name="dateRange" placeholder="~">
+            </div>
+            <label class="layui-form-label">关键词：</label>
+            <div class="layui-inline">
+                <input class="layui-input" name="searchKey" id="searchKey" autocomplete="off">
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+    </div>
+</form>
+<table class="layui-hide" id="orderGrid"></table>
+<div id="pageDiv" class="layui-layer-page">
+
+</div>
+<div th:replace="/footer :: footer"></div>
+<script type="text/html" id="orderOptBar" class="layui-hide">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">查看/确认订单</a>
+</script>
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            //日期范围
+            laydate.render({
+                elem: '#dateRange'
+                , range: '~'
+                ,format:'yyyy-MM-dd'
+            });
+        });
+
+        table.render({
+            elem: '#orderGrid'
+            ,url:'/scm/order/orderGrid'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [
+                [
+                     {fixed:true,toolbar: '#orderOptBar',title:"操作"}
+                    ,{field:'id',sort: true, title:'ID'}
+                    ,{field:'billNo', width:80, title: '订单号'}
+                    ,{field:'currencyName',title: '币种'}
+                    ,{field:'taxRate',title: '税率'}
+                    ,{field:'biller', title: '制单人'} //minWidth：局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                    ,{field:'billDate', title: '制单日期'}
+                    ,{field:'checker', title: '审核人'}
+                    ,{field:'checkDate', title: '审核日期'}
+                    ,{field:'readFlag', title: '订单状态'}
+                ]
+            ]
+            ,page: true
+        });
+        table.on('tool(orderOptBar)', function(obj){
+           if(obj.event === 'edit'){
+                layer.alert('编辑行：<br>'+ JSON.stringify(data))
+            }
+        });
+
+        table.reload(function () {
+
+        });
+        var $ = layui.$, active = {
+            reload: function(){
+                var time = $("#dateRange").val();
+                var startDate = $.trim(time.split("~")[0]);
+                var endDate = $.trim(time.split("~")[1]);
+                var searchKey=$('#searchKey');
+                //执行重载
+                table.reload('orderGrid', {
+                    page: {
+                        pageNum: 1 ,//重新从第 1 页开始
+                        pageSize:20
+                    }
+                    ,where: {
+                        startDate: startDate,
+                        endDate:endDate,
+                        searchKey:searchKey.val()
+
+                    }
+                });
+            }
+        };
+
+        $('.layui-form .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+
+</body>
+</html>

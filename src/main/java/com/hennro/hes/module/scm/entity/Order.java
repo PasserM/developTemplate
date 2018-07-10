@@ -1,5 +1,6 @@
 package com.hennro.hes.module.scm.entity;
 
+import com.hennro.hes.common.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 @Setter
 @Entity
 @Table(name = "H_POOrder")
-public class Order {
+public class Order extends BaseEntity {
     @Id
     @Column(name = "FID")
     private int id;
@@ -29,9 +30,6 @@ public class Order {
     private Date checkDate;
     private String readFlag;
     private String loginName;
-    private String startDate;
-    private String endDate;
-    private String searchKey;
 
 
 }
