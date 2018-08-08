@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+    <div class="btn-group" id="btnGroup_Preorder">
+        <button class="layui-btn"onclick="uploadFile()">上传附件</button>
+    </div>
+
+        <input class="layui-hide" id="fid" name="fid" th:value="${preOrder.id}"/>
+        <table align="center">
+            <tr>
+                <td >订单号：</td><td th:text="${preOrder.billNo }"></td>
+                <td > 供应商：</td><td th:text="${preOrder.supplyName }"></td>
+                <td >制单人：</td><td th:text="${preOrder.biller}"></td>
+            </tr>
+            <tr>
+                <td>币种：</td><td th:text="${preOrder.currencyName }"></td>
+                <td>税率：</td><td th:text="${preOrder.taxRate }"></td>
+                <td>制单日期：</td><td th:text="${#dates.format(preOrder.billDate,'yyyy-MM-dd')}"></td>
+            </tr>
+            <tr>
+                <td>状态：</td><td th:text="${preOrder.status }"></td>
+                <td>审核人：</td><td th:text="${preOrder.checker }"></td>
+                <td>审核日期：</td><td th:text="${#dates.format(preOrder.checkDate,'yyyy-MM-dd')}"></td>
+            </tr>
+        </table>
+    <table id="contentTable" class="layui-table">
+        <thead>
+        <tr >
+            <th>序号</th>
+            <th>物料名称</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>入库数量</th>
+            <th>计量单位</th>
+            <th>不含税金额</th>
+            <th>税率</th>
+            <th>税额</th>
+            <th>含税金额</th>
+            <th>到货日期</th>
+            <th>订单日期</th>
+            <th>备注</th>
+            <th>状态</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="preDetails,detailsStat:${detailsList}">
+                <td th:text="${preDetails.entryID}"></td>
+                <td th:text="${preDetails.itemName}"></td>
+                <td th:text="${preDetails.price}"></td>
+                <td th:text="${preDetails.qty}"></td>
+                <td th:text="${preDetails.stockQty}"></td>
+                <td th:text="${preDetails.unit}"></td>
+                <td th:text="${preDetails.amount}"></td>
+                <td th:text="${preDetails.taxRate}"></td>
+                <td th:text="${preDetails.taxAmount}"></td>
+                <td th:text="${preDetails.allAmount}"></td>
+                <td th:text="${#dates.format(preDetails.getDate,'yyyy-MM-dd')}"></td>
+                <td th:text="${#dates.format(preDetails.orderDate,'yyyy-MM-dd')}"></td>
+                <td th:text="${preDetails.memo}"></td>
+                <td th:text="${preDetails.stauts}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table id="attachmentTable" class="layui-table">
+        <thead>
+        <tr >
+            <th>附件名称</th>
+            <th>附件类型</th>
+            <th>附件大小(mb)</th>
+            <th>上传时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="attachment,attStat:${attList}">
+            <td th:text="${attachment.attName}"></td>
+            <td th:text="${attachment.attType}"></td>
+            <td th:text="${attachment.fileSize/1024/1024>1 ? (attachment.fileSize/1024/1024)+'MB':(attachment.fileSize/1024)+'KB'}"></td>
+            <td th:text="${#dates.format(attachment.uploadDate,'yyyy-MM-dd')}"></td>
+            <td>
+                <a class="layui-btn layui-btn-xs" th:onclick="'javascript:downLoad('+${attachment.id}+')'">下载</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" th:onclick="'javascript:del('+${attachment.id}+')'">删除</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <form id="downloadForm" method="post" action="/scm/preorder/downLoad">
+        <input class="layui-hide" id="attId" name="attId" />
+    </form>
+    <div class='layui-upload-drag layui-hide' id='uploadDiv' name='uploadDiv' >
+        <i class='layui-icon'></i>
+        <p>点击上传，或将文件拖拽到此处</p>
+    </div>
+<div th:replace="/footer :: footer"></div>
+<script >
+
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var fid = $("#fid").val();
+
+    layui.use('upload', function(){
+        var upload = layui.upload;
+        //拖拽上传
+        upload.render({
+            elem: '#uploadDiv'
+            ,accept: 'file'
+            ,size: 1024*50
+            ,url: '/scm/preorder/upload?id='+fid
+            ,done: function(data) {
+                layer.msg(data.result,{time:1000});
+            }
+
+        });
+    });
+
+    layui.use('table', function(){
+        var table = layui.table;
+        //监听工具条
+        table.on('tool(optBar)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'downLoad'){
+                layer.msg('ID：'+ data.id + ' 的下载操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+    });
+
+/**
+ *上传文件
+ * @param preOrderId
+ */
+function uploadFile(preOrderId) {
+    $('#uploadDiv').removeClass('layui-hide');
+    layer.open({
+        type: 1
+        ,title: false //不显示标题栏
+        ,content:$("#uploadDiv")
+        ,end:function (index) {
+            $('#uploadDiv').addClass('layui-hide');
+        }
+        ,cancel: function(){
+            //右上角关闭回调 刷新附件列表
+           layer.msg("上传完毕，即将刷新",{time:1000});
+            var id = $('#fid').val();
+            window.location.href="/scm/preorder/details?id="+fid;
+        }
+    });
+}
+
+function  downLoad(attId) {
+    window.location.href="/scm/preorder/downLoad?attId="+attId;
+}
+
+/**
+ *删除附件
+ * @param attId
+ */
+function del(attId) {
+    layer.confirm('确定要删除该附件吗？', function(index){
+        $.ajax({
+            url:"/scm/preorder/delete",
+            data:{attId:attId},
+            dataType:"json",
+            success:function (data) {
+                layer.msg(data.result,{time:1000});
+                window.location.href="/scm/preorder/details?id="+fid;
+            }
+        });
+    });
+}
+</script>
+</body>
+</html>

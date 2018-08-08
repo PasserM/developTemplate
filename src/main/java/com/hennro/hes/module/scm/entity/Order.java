@@ -1,20 +1,18 @@
 package com.hennro.hes.module.scm.entity;
 
-import com.hennro.hes.common.base.BaseEntity;
+import com.hennro.hes.module.scm.entity.vo.BaseVO;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "H_POOrder")
-public class Order extends BaseEntity {
+public class Order extends BaseVO {
     @Id
     @Column(name = "FID")
     private int id;

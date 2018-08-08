@@ -24,7 +24,32 @@
 		inner join t_Supplier s on o.FSupplyID=s.FItemID
 		inner join t_Currency c on o.FCurrencyID=c.FCurrencyID
 	</sql>
-    <select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
+	<select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
+		select * from (
+		<include refid="baseSql"/>
+		) t
+		where t.supplyName= #{supplyName}
+		<if test="startDate != null">
+			<![CDATA[
+		and t.billDate>=#{startDate}
+		]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+		and t.billDate<=#{endDate}
+		]]>
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			<bind name="searchKey" value="'%'+searchKey+'%'"/>
+			<![CDATA[
+		and concat(
+			t.billNo,t.biller,t.checker,t.supplyName,t.currencyName,t.readFlag
+    		) like #{searchKey}
+    		]]>
+		</if>
+		order by billDate desc
+	</select>
+    <!--<select id="findAll" resultType="com.hennro.hes.module.scm.entity.Order">
 		select top #{pageSize} * from (
 		select top ( (#{PageNum}+1) * #{pageSize}) * from(
 		select * from (
@@ -51,5 +76,168 @@
 		</if>
 		order by billDate desc
 		)) o
-    </select>
+    </select>-->
+	<select id="getById" resultType="com.hennro.hes.module.scm.entity.Order">
+		<include refid="baseSql"></include>
+		WHERE o.[FID] = #{id}
+	</select>
+	<update id="updateStatus" >
+		update H_POOrder set FReadFlag = #{readFlag}
+		where fid = #{id}
+	</update>
+
+	<select id="getOrderDetails" resultType="com.hennro.hes.module.scm.entity.OrderDetails">
+		select
+		t2.FEntryID as id,
+		t1.FID as fid,
+		t3.FShortNumber as shortNumber,
+		t3.FName as name,
+		t3.FPlanType as planType,
+		t3.FType as type,
+		t2.FUnit as unit,
+		t2.FQty as qty,
+		t2.FPrice as price,
+		t2.FAmount as amount,
+		t2.FAllAmount as allAmount,
+		t2.FBatchNo as batchNo,
+		t2.FGetDate as getDate,
+		t2.FFromID as fromID,
+		t2.FMemo as memo,
+		t1.FTaxRate as taxRate,
+		t2.FSCMStatus as scmStatus
+		from H_POOrder t1
+		inner join H_POOrderEntry t2
+		on t1.FID =t2.FID
+		inner join H_ItemMrpIC t3
+		on t2.FItemID =t3.FItemID
+		where t1.fid = #{id}
+	</select>
+
+	<select id="findExportList" resultType="com.hennro.hes.module.scm.entity.OrderExport">
+		select * From
+			(  select 0 as checked,
+			t0.FID as fid,
+			t0.FBillNo as billNo,
+			convert(varchar(10),t0.FDate,120) as date,
+			convert(varchar(10),t1.FGetDate,120) as getDate ,
+			isNull(tIc.FType,'') as ticType,
+			tSu.FName as tsuName,
+			t_Currency.FName currencyName ,
+			tIC.FName as ticName,
+			tIC.FShortNumber as shortNumber ,
+			convert(decimal(28,1),t1.FQty) as qty,
+			convert(decimal(28,4),t1.FPrice) as price,
+			tSu.FNumber as tsuNumber,
+			t0.FTaxRate as taxRate,
+			t0.FNote as note,
+			t1.FEntryID as entryID,
+			isNull(tIc.FPlanType,'') as planType,
+			t1.FUnit as unit,
+			convert(decimal(28,2),t1.FAmount) as amount,
+			convert(decimal(28,2),t1.FAllAmount) as allAmount,
+			isNull(t1.FInBeforeQty,0) as inBeforeQty,
+			isNull(t1.FStockQty,0) as stockQty ,
+			t1.FBatchNo as batchNo,
+			(case when ISNULL(t1.FFromType,0)=1 then '计划' else '手动' end )  as fromTye,
+			t1.FFromID as fromID,
+			t1.FMemo  as memo,
+			ISNULL(t0.FBiller,'') as biller,
+			convert(varchar(16),t0.FBillDate,120) as billDate,
+			ISNULL(t0.FChecker,'') as checker,
+			convert(varchar(16),t0.FCheckDate,120) as checkDate,
+			'' as invoiceNo
+			From H_POOrder t0
+			inner join t_Supplier tSu on t0.FSupplyID=tSu.FItemID
+			inner join t_Currency on t0.FCurrencyID=t_Currency.FCurrencyID
+			inner join H_POOrderEntry t1 on t0.FID=t1.FID
+			inner join H_ItemMrpIC tIc on t1.FItemID=tIc.FItemID
+			where t0.FReadFlag= 2
+		) t
+		where t.tsuName=#{tsuName}
+
+		<if test="startDate != null">
+			<![CDATA[
+		and (t.billDate>=#{startDate} or t.getDate>=#{startDate})
+		]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+		and (t.billDate<=#{endDate} or t.getDate<=#{endDate})
+		]]>
+
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			<bind name="searchKey" value="'%'+searchKey+'%'"/>
+			<![CDATA[
+			and concat(
+			t.billNo,t.biller,t.checker,t.tsuName,t.currencyName,t.ticName,t.shortNumber
+    		) like #{searchKey}
+    		]]>
+		</if>
+		order by date,billNo desc
+	</select>
+
+	<select id="getByOrder" resultType="com.hennro.hes.module.scm.entity.OrderExport">
+		select * From
+		(  select 0 as checked,
+		t0.FID as fid,
+		t0.FBillNo as billNo,
+		convert(varchar(10),t0.FDate,120) as date,
+		convert(varchar(10),t1.FGetDate,120) as getDate ,
+		isNull(tIc.FType,'') as ticType,
+		tSu.FName as tsuName,
+		t_Currency.FName currencyName ,
+		tIC.FName as ticName,
+		tIC.FShortNumber as shortNumber ,
+		convert(decimal(28,1),t1.FQty) as qty,
+		convert(decimal(28,4),t1.FPrice) as price,
+		tSu.FNumber as tsuNumber,
+		t0.FTaxRate as taxRate,
+		t0.FNote as note,
+		t1.FEntryID as entryID,
+		isNull(tIc.FPlanType,'') as planType,
+		t1.FUnit as unit,
+		convert(decimal(28,2),t1.FAmount) as amount,
+		convert(decimal(28,2),t1.FAllAmount) as allAmount,
+		isNull(t1.FInBeforeQty,0) as inBeforeQty,
+		isNull(t1.FStockQty,0) as stockQty ,
+		t1.FBatchNo as batchNo,
+		(case when ISNULL(t1.FFromType,0)=1 then '计划' else '手动' end )  as fromTye,
+		t1.FFromID as fromID,
+		t1.FMemo  as memo,
+		ISNULL(t0.FBiller,'') as biller,
+		convert(varchar(16),t0.FBillDate,120) as billDate,
+		ISNULL(t0.FChecker,'') as checker,
+		convert(varchar(16),t0.FCheckDate,120) as checkDate,
+		'' as invoiceNo
+		From H_POOrder t0
+		inner join t_Supplier tSu on t0.FSupplyID=tSu.FItemID
+		inner join t_Currency on t0.FCurrencyID=t_Currency.FCurrencyID
+		inner join H_POOrderEntry t1 on t0.FID=t1.FID
+		inner join H_ItemMrpIC tIc on t1.FItemID=tIc.FItemID
+		where t0.FReadFlag= 2
+		) t
+		where t.billNo=#{billNo}
+		and t.ticName=#{ticName}
+		and t.shortNumber=#{shortNumber}
+	</select>
+	<update id="updateOrderQty" parameterType="java.util.List">
+
+		<foreach collection="importList" item="order" index="index" open="" close="" separator=";" >
+			update H_POOrderEntry
+			set
+				FinBeforeQty = isNull(FInBeforeQty,0)+#{order.inBeforeQty}
+			where
+				FID= #{order.fid} and  FEntryID= #{order.entryID};
+			update H_POOrderEntry
+			set
+			FinBeforeQty = isNull(FInBeforeQty,0)+#{order.inBeforeQty}
+			where
+			FID= #{order.fid} and  FEntryID= #{order.entryID}
+		</foreach>
+
+	</update>
+	<select id="getSupplier" resultType="">
+
+	</select>
 </mapper>

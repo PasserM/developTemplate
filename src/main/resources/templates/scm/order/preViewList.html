@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+<div class="btn-group" id="btnGroup_Order">
+    <button class="layui-btn" onclick="exportExcel()">导出Excel</button>
+    <button class="layui-btn" onclick="importExcel()">导入Excel</button>
+    <!-- 导入EXCEL -->
+    <div class="layui-upload layui-inline layui-hide" id="importDiv" name="importDiv">
+        <button type="button" class="layui-btn layui-btn-normal" id="selectFile">选择文件</button>
+        <button type="button" class="layui-btn" id="importBtn">开始上传</button>
+    </div>
+</div>
+<br/>
+<div class="layui-form-item">
+    <div class="layui-inline">
+        <label class="layui-form-label">日期范围</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="dateRange"  name="dateRange" placeholder="~">
+        </div>
+        <label class="layui-form-label">关键词：</label>
+        <div class="layui-inline">
+            <input class="layui-input" name="searchKey" id="searchKey">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+</div>
+
+<table class="layui-hide" id="previewGrid" name="previewGrid" lay-filter="previewGrid"></table>
+
+
+</body>
+
+
+<div th:replace="/footer :: footer"></div>
+<script>
+
+    layui.use(['table','laydate','layer','upload'], function(){
+        var table = layui.table;
+        var laydate = layui.laydate;
+        var layer = layui.layer;
+        var upload = layui.upload;
+        //日期范围控件初始化
+        laydate.render({
+            elem: '#dateRange'
+            , range: '~'
+            ,format:'yyyy-MM-dd'
+        });
+
+        table.render({
+            elem: '#previewGrid'
+            ,url:'/scm/preview/previewGrid'
+            ,cellMinWidth: 60 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [
+                [
+                    {field:'billNo',title: '订单号'}
+                    ,{field:'shortNumber',title: '物料代码'}
+                    ,{field:'ticName',title: '物料名称'}
+                    ,{field:'qty', title: '订货数量'}
+                    ,{field:'unit', title: '计量单位'}
+                    ,{field:'price',title: '单价'}
+                    ,{field:'currencyName',title: '币种'}
+                    //,{field:'invoiceNo', title: '发票号'}
+                    ,{field:'inBeforeQty', title: '发货数量'}
+                    ,{field:'allAmount', title: '含税金额'}
+                    ,{field:'billDate',title:"订单日期",sort:true,
+                        templet:function(tpl){
+                            return ''+tpl.billDate.substr(0,10)+''
+                        }
+                    }
+                    ,{field:'getDate', title: '预计到货日期',width:120,
+                        templet:function(tpl){
+                            return ''+tpl.getDate.substr(0,10)+''
+                        }
+                    }
+                ]
+            ]
+            ,page:{
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+            }
+        });
+        var $ = layui.$, active = {
+            reload: function(){
+                var searchKey = $('#searchKey');
+                var time = $("#dateRange").val();
+                var startDate = $.trim(time.split("~")[0]);
+                var endDate = $.trim(time.split("~")[1]);
+                //执行重载
+                table.reload('previewGrid', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        //设定异步数据接口的额外参数
+                        startDate: startDate,
+                        endDate:endDate,
+                        searchKey: searchKey.val()
+                    }
+                });
+            }
+        };
+
+        $('.layui-form-item .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //选完文件后不自动上传
+        upload.render({
+            elem: '#selectFile'
+            ,url: '/scm/preview/importExcel'
+            ,auto: false
+            ,accept: 'file' //上传普通文件
+            ,exts: 'xls|xlsx' //只允许上传excel格式
+            //,multiple: true
+            ,bindAction: '#importBtn'
+            ,done: function(data){
+                // console.log(data);
+                layer.msg(data.result,{time:1500});
+                $('#importDiv').addClass('layui-hide');
+            }
+        });
+    });
+
+
+</script>
+<script>
+
+    function exportExcel(){
+        var searchKey = $('#searchKey');
+        var time = $("#dateRange").val();
+        var startDate = $.trim(time.split("~")[0]);
+        var endDate = $.trim(time.split("~")[1]);
+        alert("/scm/preview/exportExcel?startDate="+startDate+"&endDate="+endDate+"&searchKey="+searchKey);
+        window.location.href="/scm/preview/exportExcel?startDate="+startDate+"&endDate="+endDate+"&searchKey="+searchKey.val();
+    }
+
+    /**
+     *导入
+     */
+    function importExcel() {
+        $('#importDiv').removeClass('layui-hide');
+        /*layer.open({
+            type: 1
+            ,title: "导入EXCEL" //不显示标题栏
+            ,content:$("#importDiv")
+            ,end:function (index) {
+                $('#importDiv').addClass('layui-hide');
+            }
+        });*/
+    }
+
+</script>
+</html>

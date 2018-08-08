@@ -32,6 +32,7 @@ public class IndexController {
     @Resource
     private MenuService menuService;
 
+
     @RequestMapping
     public String index(String type,Model model,HttpSession session) {
         Subject subject = SecurityUtils.getSubject();
@@ -81,6 +82,7 @@ public class IndexController {
             subject.login(usernamePasswordToken);   //完成登录
             HUser user=(HUser) subject.getPrincipal();
             session.setAttribute("user", user);
+
             return Response.success(null);
         } catch(Exception e) {
             return Response.failure(e.toString());

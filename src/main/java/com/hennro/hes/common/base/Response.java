@@ -18,7 +18,7 @@ public class Response<T> {
     private String code;
     private String msg;
     private T result;
-    private List<Object> data;
+    private T data;
 
     public static <T> Response<T> success(T data) {
         Response<T> response = new Response<>();
@@ -28,7 +28,7 @@ public class Response<T> {
         return response;
     }
 
-    public static <T> Response<T> success(List<Object> data) {
+    public static <T> Response<T> successReturn(T data) {
         Response<T> response = new Response<>();
         response.setMsg("success");
         response.setCode("200");

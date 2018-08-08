@@ -1,12 +1,11 @@
 package com.hennro.hes.module.scm.controller;
 
-import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import com.hennro.hes.common.JsonHelper;
-import com.hennro.hes.common.base.Response;
 import com.hennro.hes.module.scm.entity.Order;
+import com.hennro.hes.module.scm.entity.OrderDetails;
 import com.hennro.hes.module.scm.service.OrderService;
 import com.hennro.hes.module.sys.core.entity.HUser;
-import com.hennro.hes.utils.DateUtils;
 import com.hennro.hes.utils.LayUI;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -18,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.plaf.LayerUI;
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -42,22 +39,15 @@ public class OrderController {
 
 //        List<Order> orderList = orderService.getOrderList(user.getFLoginName());
 //        model.addAttribute("orderList", orderList);
-        return "scm/order/orderList2";
+        return "scm/order/orderList";
 
     }
     @RequestMapping(value = {"orderGrid"})
     @ResponseBody
-    public Object orderGrid(HttpServletRequest request,Integer pageNum,Integer pageSize,Order order, HttpServletResponse response, Model model) {
+    public Object orderGrid(HttpServletRequest request,Integer page,Integer limit ,Order order, HttpServletResponse response, Model model) {
         System.out.println("===绑定数据===" );
         Subject subject = SecurityUtils.getSubject();
         HUser user = (HUser) subject.getPrincipal();
-        if(pageNum==null){
-            pageNum=1;
-
-        }
-        if(pageSize==null){
-            pageSize=20;
-        }
         //如果没选时间，默认一周内
 
         /*数据较老暂时去掉默认一周
@@ -67,11 +57,39 @@ public class OrderController {
             order.setStartDate(DateUtils.addDate(now,0,0,-7,0,0,0,0));
         }
         */
-        order.setPageNum(pageNum);
-        order.setPageSize(pageSize);
+        order.setPageNum(page);
+        order.setPageSize(limit);
         order.setSupplyName(user.getFLoginName());
-        List<Order> orderList = orderService.getOrderList(order);
+
+        PageInfo pageInfo = orderService.getOrderList(order);
+        //List<Order> orderList = orderService.getOrderList(order);
        // model.addAttribute("orderList", orderList);
-        return  jsonHelper.string(LayUI.data(20,orderList));
+        return  jsonHelper.string(LayUI.data(pageInfo));
     }
+
+    @RequestMapping(value = {"details"})
+    public String details( String id,HttpServletRequest request, HttpServletResponse response, Model model) {
+        Order order = orderService.getById(id);
+
+        if("未读".equals(order.getReadFlag())){
+            orderService.updateStatus(order, "1");
+            order = orderService.getById(id);
+        }
+
+        List<OrderDetails> detailsList = orderService.getOrderDetails(id);
+        model.addAttribute("order", order);
+        model.addAttribute("detailsList", detailsList);
+
+        return "scm/order/orderDetails";
+    }
+
+    @RequestMapping(value = {"checkOrder"})
+    public String checkOrder( String id,HttpServletRequest request, HttpServletResponse response, Model model) {
+        //更新订单确认状态
+        System.out.println("=确认订单 =");
+        Order order = orderService.getById(id);
+        orderService.updateStatus(order,"2");
+        return "redirect:/scm/order/details?id="+id;
+    }
+
 }

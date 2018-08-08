@@ -1,20 +1,21 @@
 package com.hennro.hes.module.scm.entity;
 
+import com.hennro.hes.module.scm.entity.vo.BaseVO;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.io.Serializable;
 import java.util.Date;
 
 @Getter
 @Setter
 @Entity
-public class OrderExport {
+public class OrderExport extends BaseVO {
 
 	@Id
 	private Long fid;
+	private String entryID;
 	private String billNo;
 	private String date;
 	private String getDate;
@@ -28,7 +29,6 @@ public class OrderExport {
 	private String tsuNumber;
 	private Double taxRate;
 	private String note;
-	private String entryID;
 	private String planType;
 	private String unit;
 	private double amount;
@@ -40,12 +40,9 @@ public class OrderExport {
 	private String fromID;
 	private String memo;
 	private String biller;
-	private String billDate;
+	private Date billDate;
 	private String checker;
-	private String checkDate;
-	private String startDate;
-	private String endDate;
-	private String searchKey;
+	private Date checkDate;
 	private String invoiceNo;
 
 	

@@ -1,12 +1,12 @@
 package com.hennro.hes.module.scm.entity;
 
+import com.hennro.hes.module.scm.entity.vo.BaseVO;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 
@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-public class Preorder {
+public class Preorder extends BaseVO {
 	@Id
 	private int id;
 	private String tranType;
@@ -34,9 +34,6 @@ public class Preorder {
 	private String invoiceNo;
 	private String isChangePrice;
 	private String priceVer;
-	private String startDate;
-	private String endDate;
-	private String searchKey;
 
 
 }

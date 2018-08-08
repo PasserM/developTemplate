@@ -1,4 +1,4 @@
-package com.hennro.hes.common.base;
+package com.hennro.hes.module.scm.entity.vo;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class BaseEntity {
+public class BaseVO {
     private Integer pageNum;
     private  Integer pageSize;
     private String searchKey;

@@ -3,68 +3,106 @@
 <head th:replace="/header :: header">
 </head>
 <body>
-<div class="layui-form">
     <div class="layui-form-item">
         <div class="layui-inline">
             <label class="layui-form-label">日期范围</label>
             <div class="layui-input-inline">
-                <!--<input type="text" class="layui-input" id="dateRange"  name="dateRange" placeholder=" - ">-->
-                <input type="text" class="layui-input" id="dateRange" th:value="${order.startTime!=null}? |${#dates.format(order.startTime,'yyyy-MM-dd')} ~ ${#dates.format(order.endTime,'yyyy-MM-dd')}| : ''">
+                <input type="text" class="layui-input" id="dateRange"  name="dateRange" placeholder="~">
             </div>
             <label class="layui-form-label">关键词：</label>
             <div class="layui-inline">
-                <input class="layui-input" name="searchKey" id="searchKey" autocomplete="off">
+                <input class="layui-input" name="searchKey" id="searchKey" >
             </div>
             <button class="layui-btn" data-type="reload">搜索</button>
         </div>
     </div>
-</div>
-<table class="layui-table"
-       lay-data="{url:'/scm/order/orderGrid',id:'orderGrid',page:false}"
+<table class="layui-hide" id="orderGrid" lay-filter="orderGrid"></table>
 
->
-    <thead>
-    <tr>
-        <!--<th lay-data="{fixed: 'right',toolbar: '#orderOptBar'}">操作</th>-->
-        <th lay-data="{field:'id',sort: true, fixed: true}">ID</th>
-        <th lay-data="{field:'billNo',}">订单号</th>
-        <th lay-data="{field:'currencyName'}">币种</th>
-        <th lay-data="{field:'taxRate',}">税率</th>
-        <th lay-data="{field:'biller'}">制单人</th>
-        <th lay-data="{field:'billDate',sort: true}">制单日期</th>
-        <th lay-data="{field:'checker',}">审核人</th>
-        <th lay-data="{field:'checkDate', sort: true}">审核日期</th>
-        <th lay-data="{field:'readFlag'}">订单状态</th>
-
-    </tr>
-    </thead>
-</table>
-
-<script type="text/html" id="orderOptBar">
-    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看/确认订单</a>
+<div th:replace="/footer :: footer"></div>
+<script type="text/html" id="orderOptBar" class="layui-hide">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">查看/确认订单</a>
 </script>
-
-
 <script>
-    layui.use('table', function(){
+    layui.use(['table','laydate','layer'], function(){
         var table = layui.table;
-        //监听工具条
-        // table.on('tool(orderOptBar)', function(obj){
-        //     var data = obj.data;
-        //     if(obj.event === 'detail'){
-        //         layer.msg('ID：'+ data.id + ' 的查看操作');
-        //     }
-        // });
+        var laydate = layui.laydate;
+        var layer = layui.layer;
+        //日期范围
+        laydate.render({
+            elem: '#dateRange'
+            , range: '~'
+            ,format:'yyyy-MM-dd'
+        });
+
+
+        table.render({
+            elem: '#orderGrid'
+            ,url:'/scm/order/orderGrid'
+            ,cellMinWidth: 60 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [
+                [
+                     {fixed:true,toolbar: '#orderOptBar',title:"操作",width:120}
+                    //,{field:'id',sort: true, title:'ID'}
+                    ,{field:'billNo',title: '订单号'}
+                    ,{field:'currencyName',title: '币种'}
+                    ,{field:'taxRate',title: '税率'}
+                    ,{field:'biller', title: '制单人'} //minWidth：局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                    ,{field:'billDate', title: '制单日期',
+                        templet: function(tpl){
+                            return ''+tpl.billDate.substr(0,10)+''
+                        }
+                    }
+                    ,{field:'checker', title: '审核人'}
+                    ,{field:'checkDate', title: '审核日期',
+                        templet:function(tpl){
+                            return ''+tpl.checkDate.substr(0,10)+''
+                        }
+                    }
+                    ,{field:'readFlag', title: '订单状态'}
+                ]
+            ]
+            ,page:{
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+            }
+        });
+        table.on('tool(orderGrid)', function(obj){
+
+            var data = obj.data;
+           if(obj.event === 'edit'){
+               layer.open({
+                   title: '确认订单'
+                   ,type:2
+                   ,content: '/scm/order/details?id='+data.id
+                   ,area:['100%','100%']
+                   ,offset:'lt'
+               });
+           }
+        });
+       var $ = layui.$, active = {
+            reload: function(){
+                var time = $("#dateRange").val();
+                var startDate = $.trim(time.split("~")[0]);
+                var endDate = $.trim(time.split("~")[1]);
+                var searchKey=$('#searchKey');
+                //执行重载
+                table.reload('orderGrid', {
+                    page: {
+                        curr: 1 ,//重新从第 1 页开始
+                    }
+                    ,where: {
+                        startDate: startDate,
+                        endDate:endDate,
+                        searchKey:searchKey.val()
+
+                    }
+                });
+            }
+        };
+        $('.layui-form-item .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
     });
-    //
-    // layui.use('laydate', function() {
-    //     var laydate = layui.laydate;
-    //     //日期范围
-    //     laydate.render({
-    //         elem: '#dateRange'
-    //         , range: true
-    //     });
-    // });
 </script>
 </body>
 </html>

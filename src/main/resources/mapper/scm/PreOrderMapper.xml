@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hennro.hes.module.scm.mapper.PreOrderMapper">
+	
+	<sql id="baseSelect">
+	select * from (
+		select 
+			FID as id,
+			FTranType as tranType,
+			FBillNo as billNo,
+			FDate as date,
+			(select fname from t_Supplier s where s.FItemID = o.FSupplyID)  as supplyName,
+			(select c.FName from t_Currency c where c.FCurrencyID = o.FCurrencyID) as currencyName ,
+			FTaxRate as taxRate ,
+			FNote as note,
+			FBiller as biller,
+			FBillDate as billDate,
+			FChecker as checker,
+			FCheckDate as checkDate,
+			FStatus as status,
+			FInvoiceNo as invoiceNo,
+			FIsChangePrice as isChangePrice,
+			FPriceVer as priceVer
+		from H_POInBefore o
+		) t
+	</sql>
+	<select id="getById" resultType="com.hennro.hes.module.scm.entity.Preorder">
+		<include refid="baseSelect"></include>
+		WHERE t.id = #{id}
+	</select>
+	<select id="checkInvoiceExist" resultType="java.lang.Integer">
+		select count(0) from H_POInBefore
+		where FInvoiceNo = #{invoiceNo}
+	</select>
+	<select id="findList" resultType="com.hennro.hes.module.scm.entity.Preorder">
+		<include refid="baseSelect"></include>
+		where t.supplyName=#{supplyName}
+		<if test="startDate != null and startDate != ''">
+		<![CDATA[
+		and t.billDate>=#{startDate}
+		]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+		<![CDATA[
+		and t.billDate<=#{endDate}
+		]]>
+		</if>
+		
+		<if test="searchKey != null and searchKey != ''">
+		<bind name="searchKey" value="'%'+searchKey+'%'" />
+		<![CDATA[
+		and concat(
+			t.billNo,t.biller,t.checker,t.supplyName,t.currencyName,t.note
+    		) like #{searchKey}
+    		]]>
+		</if>
+		order by t.date desc 
+	</select>
+	
+	<select id="getOrderDetails" resultType="com.hennro.hes.module.scm.entity.PreOrderDetails">
+	select FID as fid,
+       FEntryID as entryID,
+       (select FFullname from H_ItemMrpIC i where e.FItemID= i.FItemID) as itemName, 
+       FUnit as unit,
+       FQty as qty,
+       FStockQty as stockQty,
+       FBatchNo as batchNo,
+       FOrderDate as orderDate,
+       FGetDate as [getDate],
+       FFromID as fromID,
+       FFromEntryID as fromEntryID,
+       FFromBuyPlanID as fromBuyPlanID,
+       FStatus as stauts,
+       FMemo as memo,
+       FAmount as amount,
+       FTaxAmount as taxAmount,
+       FAllAmount as allAmount,
+       FPrice as price,
+       FTaxRate as taxRate
+	from H_POInBeforeEntry e
+	where e.fid = #{id}
+	</select>
+	<insert id="inserFile" parameterType="com.hennro.hes.module.scm.entity.Attachment">
+		insert into H_POOrderAttachment(FID,FAttName,FAttType,FRemark,FPath,FFileSize) values (#{fid},#{attName},#{attType},#{remark},#{path},#{fileSize})
+	</insert>
+	
+	<select id="getAttchments" resultType="com.hennro.hes.module.scm.entity.Attachment">
+		select
+			FAttID as id,
+			FID as fid,
+			FAttName as attName,
+			FAttType as attType,
+			FRemark as remark,
+			FPath as path,
+			FuploadDate as uploadDate,
+			FFileSize as fileSize
+		  from H_POOrderAttachment
+		  where fid = #{fid}
+	</select>
+	<select id="checkExist" resultType="java.lang.Integer">
+		select count(0) from H_POOrderAttachment
+		where FAttName=#{attName}
+	</select>
+
+	<select id="getAttchmentById" resultType="com.hennro.hes.module.scm.entity.Attachment">
+		select
+			FAttID as id,
+			FID as fid,
+			FAttName as attName,
+			FAttType as attType,
+			FRemark as remark,
+			FPath as path,
+			FuploadDate as uploadDate,
+			FFileSize as fileSize
+		  from H_POOrderAttachment
+		  where FAttID = #{id}
+	</select>
+	<delete id="deleteById" >
+		delete H_POOrderAttachment where FAttID = #{id}
+	</delete>
+</mapper>

@@ -28,5 +28,7 @@ public class PreOrderDetails {
 	private String fromEntryID;
 	private String memo;
 	private String stauts;
+	private Date getDate;
+	private Date orderDate;
 
 }

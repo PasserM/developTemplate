@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/header :: header">
+</head>
+<body>
+    <div class="btn-group" id="btnGroup_Order">
+        <button class="layui-btn" onclick="checkOrder()">确认订单</button>
+        <button class="layui-btn"onclick="exportPDF('${order.id}')">导出PDF</button>
+    </div>
+
+        <input class="layui-hide" id="id" name="id" th:value="${order.id}"/>
+        <table align="center">
+            <tr>
+                <td >订单号：</td><td th:text="${order.billNo }"></td>
+                <td > 供应商：</td><td th:text="${order.supplyName }"></td>
+                <td >制单人：</td><td th:text="${order.biller}"></td>
+            </tr>
+            <tr>
+                <td>币种：</td><td th:text="${order.currencyName }"></td>
+                <td>税率：</td><td th:text="${order.taxRate }"></td>
+                <td>制单日期：</td><td th:text="${#dates.format(order.billDate,'yyyy-MM-dd')}"></td>
+            </tr>
+            <tr>
+                <td>状态：</td><td th:text="${order.readFlag }"></td>
+                <td>审核人：</td><td th:text="${order.checker }"></td>
+                <td>审核日期：</td><td th:text="${#dates.format(order.checkDate,'yyyy-MM-dd')}"></td>
+            </tr>
+        </table>
+    <table id="contentTable" class="layui-table">
+        <thead>
+        <tr >
+            <th>物料代码</th>
+            <th>物料名称</th>
+            <th>计划类别</th>
+            <th>物料类别</th>
+            <th>计量单位</th>
+            <th>数量</th>
+            <th>单价</th>
+            <th>不含税金额</th>
+            <th>含税金额</th>
+            <th>税率</th>
+            <th>卡板编号</th>
+            <th>到货日期</th>
+            <th>备注</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="details,detailsStat:${detailsList}">
+                <td th:text="${details.shortNumber}"></td>
+                <td th:text="${details.name}"></td>
+                <td th:text="${details.planType}"></td>
+                <td th:text="${details.type}"></td>
+                <td th:text="${details.unit}"></td>
+                <td th:text="${details.qty}"></td>
+                <td th:text="${details.price}"></td>
+                <td th:text="${details.amount}"></td>
+                <td th:text="${details.allAmount}"></td>
+                <td th:text="${details.taxRate}"></td>
+                <td th:text="${details.batchNo}"></td>
+                <td th:text="${#dates.format(details.getDate,'yyyy-MM-dd')}"></td>
+                <td th:text="${details.memo}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+<div th:replace="/footer :: footer"></div>
+<script >
+
+    /**
+     * 确认订单
+     */
+    function checkOrder(){
+
+        layui.use('layer', function(){
+            var layer = layui.layer;
+            layer.confirm('确定订单有效', function(){
+                var id = $('#id').val();
+                window.location.href="/scm/order/checkOrder?id="+id;
+                layer.close();
+            });
+        });
+    }
+</script>
+</body>
+</html>

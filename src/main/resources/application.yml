@@ -3,6 +3,10 @@ server:
 spring:
   session:
     timeout: 6H
+  servlet:
+    multipart:
+      max-file-size: 50Mb
+      max-request-size: 50Mb
   datasource:
     sys:
         driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -25,7 +29,7 @@ spring:
         format_sql: true
 
 pagehelper:
-    helperDialect: mysql
+    helperDialect: sqlserver
     reasonable: true
     supportMethodsArguments: true
     params: count=countSql
