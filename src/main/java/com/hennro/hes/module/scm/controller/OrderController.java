@@ -9,6 +9,7 @@ import com.hennro.hes.module.sys.core.entity.HUser;
 import com.hennro.hes.utils.LayUI;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,7 @@ public class OrderController {
     @Resource
     JsonHelper jsonHelper;
 
-    @RequestMapping(value = {"list",""})
+    @RequestMapping(value = {"list"})
     public String list( HttpServletRequest request, HttpServletResponse response, Model model) {
         System.out.println("===订单列表===");
 //        Subject subject = SecurityUtils.getSubject();
